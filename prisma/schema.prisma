@@ -12,8 +12,49 @@ datasource db {
 }
 
 model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique @db.VarChar(10)
+  email     String    @unique
+  profile   Profile?
+  posts     Post[]
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Profile {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  user           User     @relation(fields: [userId], references: [id])
+  profilePicture String
+  biography      String   @db.VarChar(120)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Post {
   id          Int       @id @default(autoincrement())
-  username    String
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  title       String    @db.VarChar(150)
+  content     String
+  isPublished Boolean   @default(false)
+  imageUrl    String?
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Comment {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  postId      Int?
+  post        Post?     @relation(fields: [postId], references: [id])
+  commentId   Int?
+  comment     Comment?  @relation("subcomment", fields: [commentId], references: [id])
+  subcomments Comment[] @relation("subcomment")
+  content     String    @db.VarChar(250)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
